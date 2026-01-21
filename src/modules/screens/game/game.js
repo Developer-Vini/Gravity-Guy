@@ -1,25 +1,23 @@
+import { parallaxHorizontally } from "../../../shared/animation.js"
 import { BACKGROUND, BG_CITY_BACK, BG_CITY_FRONT, BG_LIGHT, BG_TOP_FIRST, BG_TOP_SECOND, BG_TOP_THIRD } from "./constants.js"
 
-function drawBottomParallax() {
-    BG_CITY_BACK.draw(BG_CITY_BACK.x, BG_CITY_BACK.y)
-    BG_CITY_BACK.draw(BG_CITY_BACK.x + BG_CITY_BACK.width, BG_CITY_BACK.y)
-    BG_LIGHT.draw(24, BG_LIGHT.y)
-    BG_CITY_FRONT.draw(BG_CITY_FRONT.x, BG_CITY_FRONT.y)
-    BG_CITY_FRONT.draw(BG_CITY_FRONT.x + BG_CITY_FRONT.width, BG_CITY_FRONT.y)
+function drawParallaxTop(){
+    parallaxHorizontally(BG_TOP_THIRD, 1)
+    parallaxHorizontally(BG_TOP_SECOND, 1)
+    parallaxHorizontally(BG_TOP_FIRST, 1)
 }
 
-function drawTopParallax(){
-    BG_TOP_THIRD.draw(BG_TOP_THIRD.x, BG_TOP_THIRD.y)
-    BG_TOP_THIRD.draw(BG_TOP_THIRD.x + BG_TOP_THIRD.width, BG_TOP_THIRD.y)
-    BG_TOP_SECOND.draw(BG_TOP_SECOND.x, BG_TOP_SECOND.y)
-    BG_TOP_FIRST.draw(BG_TOP_FIRST.x, BG_TOP_FIRST.y)
-    BG_TOP_FIRST.draw(BG_TOP_FIRST.x + (BG_TOP_FIRST.width * 1.65f), BG_TOP_FIRST.y)
+function drawParallaxBottom(){
+    parallaxHorizontally(BG_CITY_BACK, 1)
+    BG_LIGHT.draw(BG_LIGHT.x, BG_LIGHT.y)
+    parallaxHorizontally(BG_CITY_FRONT, 1)
 }
 
 function GAME_LOOP() {
     BACKGROUND.draw(0, 0)
-    drawBottomParallax();
-    drawTopParallax();
+    drawParallaxBottom();
+    drawParallaxTop();
+
 }
 
 export default GAME_LOOP

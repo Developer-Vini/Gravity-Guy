@@ -1,3 +1,54 @@
+import { SCREEN_WIDTH } from "./constants.js";
+
+function parallaxHorizontally(image, deltaTime) {
+    const {
+        gap = null,
+        numImages: configNumImages = null,
+        coverScreen = true,
+        parallaxSpeed = 1,
+        x = 0
+    } = image;
+
+    if (!image._parallax) {
+        let numImages, spacing;
+
+        if (configNumImages !== null) {
+            numImages = configNumImages;
+            spacing = gap ?? image.width;
+        } else if (gap !== null) {
+            spacing = image.width + gap;
+            numImages = Math.ceil(SCREEN_WIDTH / spacing) + 1;
+        } else if (coverScreen) {
+            numImages = Math.ceil(SCREEN_WIDTH / image.width) + 1;
+            spacing = image.width;
+        } else {
+            numImages = 2;
+            spacing = image.width;
+        }
+        
+        image._parallax = {
+            positions: Array.from({ length: numImages }, (_, i) => x + (i * spacing)),
+            spacing
+        };
+    }
+
+    const { positions, spacing } = image._parallax;
+
+    for (let i = 0; i < positions.length; i++) {
+        positions[i] -= parallaxSpeed * deltaTime;
+        
+        if (positions[i] <= -image.width) {
+            positions[i] += positions.length * spacing;
+        }
+    }
+
+    for (let i = 0; i < positions.length; i++) {
+        image.draw(positions[i], image.y);
+    }
+}
+
+export default parallaxHorizontally;
+
 function animationSprite(image) {
     const {
         totalFrames,
@@ -126,5 +177,6 @@ function animateWithEasing(frame, targetProps, progressFunction, duration = 2000
 export {
     animationSprite,
     setAnimation,
-    animateWithEasing
+    animateWithEasing,
+    parallaxHorizontally
 }
