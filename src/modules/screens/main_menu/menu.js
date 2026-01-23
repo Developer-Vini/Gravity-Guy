@@ -11,6 +11,7 @@ let introAnimationDone = false;
 let flashRequested = false;
 let flashing = false;
 let flashStartTime = 0;
+
 let shaking = false;
 let shakeStartTime = 0;
 let shakeOffsetX = 0;
@@ -23,6 +24,7 @@ function drawBackground() {
     if (!introAnimationDone) {
         const blueDone = animateWithEasing(BG_BLUE_GUY, { x: 0 }, Easing.linear, 600);
         const whiteDone = animateWithEasing(BG_WHITE_GUY, { x: SCREEN_WIDTH - BG_WHITE_GUY.width }, Easing.linear, 600);
+        
         if (blueDone && whiteDone) {
             introAnimationDone = true;
             flashRequested = true;

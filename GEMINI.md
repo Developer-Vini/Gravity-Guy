@@ -3,7 +3,7 @@ description: "This rule provides standards for design log files"
 alwaysApply: true
 ---
 
-# Clash Royale PS2 Project Rules
+# Gravity Guy PS2 Project Rules
 
 ## Project Context
 
