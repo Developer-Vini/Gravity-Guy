@@ -6,8 +6,14 @@ import Gamepad from './src/shared/gamepad.js'
 
 Screen.setParam(Screen.DEPTH_TEST_ENABLE, false);
 
+let lastFrameTime = Date.now();
 while (true) {
     Screen.clear();
+
+    const now = Date.now();
+    const deltaTime = (now - lastFrameTime) / 1000;
+    lastFrameTime = now;
+
     Gamepad.update();
 
     // if (ARMOR_INTRO.ready) {
@@ -25,8 +31,8 @@ while (true) {
     //     MAIN_MENU_LOOP();
     // }
 
-    // MAIN_MENU_LOOP();
-    GAME_LOOP();
+    // MAIN_MENU_LOOP(deltaTime);
+    GAME_LOOP(deltaTime);
 
     Screen.flip();
 }

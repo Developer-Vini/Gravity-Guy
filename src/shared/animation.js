@@ -60,6 +60,7 @@ function animationSprite(image) {
         startFrame = 0,
         endFrame = totalFrames - 1,
         facingLeft = false,
+        facingUp = false,
         onAnimationEnd,
         framesPerRow,
     } = image;
@@ -105,21 +106,20 @@ function animationSprite(image) {
     const row = framesPerRow ? Math.floor(frameIndex / framesPerRow) : 0;
     const col = framesPerRow ? frameIndex % framesPerRow : frameIndex;
 
-    if (facingLeft) {
-        image.startx = (col + 1) * frameWidth;
-        image.endx = col * frameWidth;
-    } else {
-        image.startx = col * frameWidth;
-        image.endx = image.startx + frameWidth;
-    }
+    image.startx = facingLeft ? (col + 1) * frameWidth : col * frameWidth
+    image.endx = facingLeft ? col * frameWidth : image.startx + frameWidth
 
-    image.starty = row * frameHeight;
-    image.endy = image.starty + frameHeight;
+    image.starty = facingUp ? (row + 1) * frameHeight  : row * frameHeight;
+    image.endy = facingUp ? row * frameHeight : image.starty + frameHeight;
 }
 
 function setAnimation(image, name, loop = true) {
     const anim = image.animations[name];
     if (!anim) return;
+    
+    if (image.currentAnimation === name) return;
+    
+    image.currentAnimation = name;
     image.startFrame = anim.start;
     image.endFrame = anim.end;
     image.currentFrame = anim.start;

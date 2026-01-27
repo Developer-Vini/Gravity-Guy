@@ -48,7 +48,7 @@ export default class Assets {
     }
 
     static free(path) {
-        [imageCache, soundCache].forEach(cache => {
+        [imageCache, soundCache, fontCache].forEach(cache => {
             const entry = cache.get(path);
             if (entry && --entry.ref <= 0) {
                 entry.asset.free();
@@ -58,7 +58,7 @@ export default class Assets {
     }
 
     static freePattern(regex) {
-        [...imageCache.keys(), ...soundCache.keys()]
+        [...imageCache.keys(), ...soundCache.keys(), ...fontCache.keys()]
             .forEach(k => { if (regex.test(k)) Assets.free(k); });
     }
 
