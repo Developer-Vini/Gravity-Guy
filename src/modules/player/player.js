@@ -7,7 +7,12 @@ import Assets from "../../shared/assets.js";
 export default class Player {
     constructor(options = {}) {
         this.PLAYER_PORT = options.PLAYER_PORT || 0;
-        this.movement = new Movement2D(options.initialX || SCREEN_WIDTH / 2, options.initialY || 100, this.PLAYER_PORT);
+        this.movement = new Movement2D({
+            initialX: options.initialX || SCREEN_WIDTH / 2,
+            initialY: options.initialY || 100,
+            playerPort: this.PLAYER_PORT,
+            onFlip: this.playDustEffect.bind(this)
+        });
         this._bounds = { left: 0, top: 0, right: 0, bottom: 0 };
 
         this.spritesheet = Assets.image(`${ASSETS_PATH.SPRITES}/${this.PLAYER_PORT}.png`)
@@ -18,7 +23,40 @@ export default class Player {
         this.debugColor = Color.new(255, 0, 0, 100);
 
         this._initAnimations();
+        this._initDustEffect();
         this._initCollider();
+    }
+
+    _initDustEffect() {
+        this.dustEffect = Assets.image(`${ASSETS_PATH.SPRITES}/dust.png`);
+        this.dustEffect.totalFrames = 5;
+        this.dustEffect.frameWidth = 53;
+        this.dustEffect.frameHeight = 43;
+        this.dustEffect.loop = false;
+        this.dustEffect.fps = 12;
+        this.dustEffect.framesPerRow = 5;
+        this.dustEffect.startFrame = 0;
+        this.dustEffect.endFrame = 4;
+        this.dustEffect.currentFrame = 0;
+        this.dustEffect.playing = false
+        this.dustEffect.facingUp = this.movement.facingUp
+
+        this.dustEffect.onAnimationEnd = () => {
+            this.dustEffect.playing = false;
+        };
+    }
+
+    playDustEffect() {
+        if (this.dustEffect.playing) return;
+
+        const bounds = this.getBounds();
+
+        this.dustEffect.playing = true;
+        this.dustEffect.currentFrame = 0;
+        this.dustEffect.frameTimer = 0;
+        this.dustEffect.x = this.movement.position.x;
+        this.dustEffect.y = this.movement.facingUp ? bounds.top : bounds.bottom;
+        this.dustEffect.facingUp = this.movement.facingUp;
     }
 
     _initAnimations() {
@@ -118,13 +156,20 @@ export default class Player {
         );
     }
 
-    draw(deltaTime) {
+    draw() {
         if (this.shouldRemove()) return;
 
-        this.spritesheet.deltaTime = deltaTime;
-        animationSprite(this.spritesheet);
+        if (this.dustEffect.playing) {
+            const y = this.dustEffect.facingUp
+                ? this.dustEffect.y
+                : this.dustEffect.y - this.dustEffect.frameHeight;
 
-        this.spritesheet.facingUp = this.movement.facingUp;
+            this.dustEffect.draw(
+                Math.fround(this.dustEffect.x - (this.dustEffect.frameWidth * 1.25)),
+                y
+            );
+        }
+
         this.spritesheet.draw(
             Math.fround(this.movement.position.x - this.spritesheet.width / 2),
             this.movement.position.y
@@ -142,10 +187,19 @@ export default class Player {
             this.movement.checkGroundCollision(this.colliderId, bounds);
         }
 
-        this.updateCollider(bounds);
+        if (this.dustEffect.playing) {
+            this.dustEffect.deltaTime = deltaTime;
+            animationSprite(this.dustEffect);
+        }
 
+        this.spritesheet.deltaTime = deltaTime;
+        animationSprite(this.spritesheet);
+        this.spritesheet.facingUp = this.movement.facingUp;
+
+        this.updateCollider(bounds);
         this.updateAnimation();
-        this.draw(deltaTime);
+
+        this.draw();
     }
 
     destroy() {
@@ -158,7 +212,8 @@ export default class Player {
         this.movement = null;
         this.debugColor = null;
 
-        Assets.free(`${ASSETS_PATH.SPRITES}/${this.PLAYER_PORT}.png`)
+        Assets.free(`${ASSETS_PATH.SPRITES}/${this.PLAYER_PORT}.png`);
+        Assets.free(`${ASSETS_PATH.SPRITES}/dust.png`);
     }
 
     shouldRemove() {

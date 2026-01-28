@@ -3,16 +3,18 @@ import Gamepad from "../../shared/gamepad.js";
 import Collision from "../../shared/collision.js";
 
 export default class Movement2D {
-    constructor(initialX, initialY, playerNumber) {
+    constructor(options) {
+        const { initialX, initialY, playerPort, onFlip } = options;
         this.position = { x: initialX || 0, y: initialY || 0 }
         this.velocity = { x: 0, y: 0 }
-        this.facingUp = false;
+        this.facingUp = true;
         this.canMove = true;
         this.onGround = false;
         this.touchingWall = false;
         this.wallDirection = 0;
+        this.onFlip = onFlip;
 
-        this.PLAYER_PORT = playerNumber;
+        this.PLAYER_PORT = playerPort;
     }
 
     isFalling = () => this.facingUp ? this.velocity.y < 0 : this.velocity.y > 0;
@@ -130,7 +132,10 @@ export default class Movement2D {
     }
 
     update(deltaTime) {
-        if (this.canMove && Gamepad.player(this.PLAYER_PORT).justPressed(Pads.CROSS)) this.flip();
+        if (this.canMove && Gamepad.player(this.PLAYER_PORT).justPressed(Pads.CROSS)) {
+            this.onFlip?.();
+            this.flip();
+        }
 
         if (this.isWallSliding()) this.velocity.y = Math.min(this.velocity.y, 0.5);
 
