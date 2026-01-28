@@ -135,7 +135,7 @@ export default class Movement2D {
     }
 
     update(deltaTime) {
-        if (this.canMove && Gamepad.player(this.PLAYER_PORT).justPressed(Pads.CROSS)) {
+        if (this.canMove && this.isGrounded() && Gamepad.player(this.PLAYER_PORT).justPressed(Pads.CROSS)) {
             this.onFlip?.();
             this.flip();
         }

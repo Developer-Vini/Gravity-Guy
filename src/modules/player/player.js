@@ -33,7 +33,7 @@ export default class Player {
         this.dustEffect.frameWidth = 53;
         this.dustEffect.frameHeight = 43;
         this.dustEffect.loop = false;
-        this.dustEffect.fps = 16;
+        this.dustEffect.fps = 24;
         this.dustEffect.framesPerRow = 5;
         this.dustEffect.startFrame = 0;
         this.dustEffect.endFrame = 4;
