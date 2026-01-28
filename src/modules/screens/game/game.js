@@ -3,7 +3,7 @@ import Collision from "../../../shared/collision.js"
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../shared/constants.js"
 import Gamepad from "../../../shared/gamepad.js"
 import Player from "../../player/player.js"
-import { BACKGROUND, BG_CITY_BACK, BG_CITY_FRONT, BG_LIGHT, BG_TOP_FIRST, BG_TOP_SECOND, BG_TOP_THIRD } from "./constants.js"
+import { BACKGROUND, BG_CITY_BACK, BG_CITY_FRONT, BG_LIGHT, BG_TOP_FIRST, BG_TOP_SECOND, BG_TOP_THIRD, STREAM_GAME } from "./constants.js"
 
 function drawParallaxTop() {
     parallaxHorizontally(BG_TOP_THIRD, 1)
@@ -48,9 +48,14 @@ function createCollider() {
     initialized = true;
 }
 
-const player = new Player()
+const player = new Player({ PLAYER_PORT: 0 })
+const player2 = new Player({ PLAYER_PORT: 1 })
 
 function GAME_LOOP(deltaTime) {
+    if (!STREAM_GAME.playing()) {
+        STREAM_GAME.play();
+    }
+
     BACKGROUND.draw(0, 0)
     drawParallaxBottom();
     drawParallaxTop();
@@ -62,6 +67,7 @@ function GAME_LOOP(deltaTime) {
     }
 
     player.update(deltaTime);
+    player2.update(deltaTime)
 
     Collision.check();
 

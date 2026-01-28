@@ -1,6 +1,9 @@
 import Assets from "../../../shared/assets.js"
 import { ASSETS_PATH, SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../shared/constants.js"
 
+const STREAM_GAME = Assets.sound("./assets/sound/game.ogg")
+STREAM_GAME.loop = true;
+
 const BACKGROUND = Assets.image(`${ASSETS_PATH.PARALLAX}/background.png`)
 const BACKGROUND_ORIGINAL_SIZE = { w: BACKGROUND.width, h: BACKGROUND.height }
 BACKGROUND.width = SCREEN_WIDTH;
@@ -62,5 +65,6 @@ export {
     BG_LIGHT,
     BG_TOP_FIRST,
     BG_TOP_THIRD,
-    BG_TOP_SECOND
+    BG_TOP_SECOND,
+    STREAM_GAME
 }
