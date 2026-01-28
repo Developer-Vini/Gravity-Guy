@@ -33,7 +33,7 @@ export default class Player {
         this.dustEffect.frameWidth = 53;
         this.dustEffect.frameHeight = 43;
         this.dustEffect.loop = false;
-        this.dustEffect.fps = 12;
+        this.dustEffect.fps = 16;
         this.dustEffect.framesPerRow = 5;
         this.dustEffect.startFrame = 0;
         this.dustEffect.endFrame = 4;
@@ -216,6 +216,7 @@ export default class Player {
 
         Assets.free(`${ASSETS_PATH.SPRITES}/${this.PLAYER_PORT}.png`);
         Assets.free(`${ASSETS_PATH.SPRITES}/dust.png`);
+        Assets.free(`${ASSETS_PATH.SOUNDS}/switch.adp`)
     }
 
     shouldRemove() {

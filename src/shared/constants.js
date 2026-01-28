@@ -2,7 +2,8 @@ const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Screen.getMode();
 
 const ASSETS_PATH = {
     PARALLAX: "./assets/img/parallax",
-    SPRITES: "./assets/img/sprites"
+    SPRITES: "./assets/img/sprites",
+    SOUNDS: "./assets/sound"
 }
 
 const PLAYER_ONE_PORT = 0;

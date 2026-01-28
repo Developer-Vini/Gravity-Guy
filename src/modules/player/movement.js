@@ -1,6 +1,7 @@
-import { PLAYER_MOVEMENT } from "../../shared/constants.js";
+import { ASSETS_PATH, PLAYER_MOVEMENT } from "../../shared/constants.js";
 import Gamepad from "../../shared/gamepad.js";
 import Collision from "../../shared/collision.js";
+import Assets from "../../shared/assets.js";
 
 export default class Movement2D {
     constructor(options) {
@@ -14,6 +15,8 @@ export default class Movement2D {
         this.onFlip = options.onFlip;
 
         this.PLAYER_PORT = options.playerPort;
+
+        this.onFlipSfx = Assets.sound(`${ASSETS_PATH.SOUNDS}/switch.adp`)
     }
 
     isFalling = () => this.facingUp ? this.velocity.y < 0 : this.velocity.y > 0;
@@ -119,6 +122,7 @@ export default class Movement2D {
     }
 
     flip() {
+        this.onFlipSfx.play();
         this.facingUp = !this.facingUp;
         this.velocity.y = -this.velocity.y;
     }
