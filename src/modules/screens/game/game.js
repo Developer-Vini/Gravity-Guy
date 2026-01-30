@@ -1,9 +1,10 @@
-import { parallaxHorizontally } from "../../../shared/animation.js"
+import { animationSprite, parallaxHorizontally, setAnimation } from "../../../shared/animation.js"
 import Assets from "../../../shared/assets.js"
 import Collision from "../../../shared/collision.js"
-import { ASSETS_PATH, PLAYER_ONE_PORT, SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../shared/constants.js"
+import { ASSETS_PATH, GAME_STATE, PLAYER_ONE_PORT, SCREEN_HEIGHT, SCREEN_WIDTH } from "../../../shared/constants.js"
 import Gamepad from "../../../shared/gamepad.js"
 import ScreenBase from "../../../shared/screenBase.js"
+import StateManager from "../../../shared/stateManager.js"
 import Player from "../../player/player.js"
 
 export default class GameScreen extends ScreenBase {
@@ -11,6 +12,7 @@ export default class GameScreen extends ScreenBase {
         super()
         this.player = null;
         this.isPaused = false;
+        this.selectedIndex = 0;
     }
 
     init() {
@@ -27,6 +29,8 @@ export default class GameScreen extends ScreenBase {
             this.STREAM_GAME.play();
         }
 
+        setAnimation(this.BTN_RESUME_PAUSE, "hover");
+        setAnimation(this.BTN_RETURN_MENU, "normal");
     }
 
     _initColliders() {
@@ -57,6 +61,8 @@ export default class GameScreen extends ScreenBase {
         this.STREAM_GAME = Assets.sound(`${ASSETS_PATH.SOUNDS}/game.ogg`)
         this.STREAM_GAME.loop = true;
 
+        this.SFX_CLICK = Assets.sound(`${ASSETS_PATH.SOUNDS}/click.adp`);
+
         this.BACKGROUND = Assets.image(`${ASSETS_PATH.PARALLAX}/background.png`)
         const BACKGROUND_ORIGINAL_SIZE = { w: this.BACKGROUND.width, h: this.BACKGROUND.height }
         this.BACKGROUND.width = SCREEN_WIDTH;
@@ -70,27 +76,27 @@ export default class GameScreen extends ScreenBase {
         this.BG_CITY_FRONT.height = this.BG_CITY_FRONT.height * scaleY;
         this.BG_CITY_FRONT.x = 0;
         this.BG_CITY_FRONT.y = SCREEN_HEIGHT - this.BG_CITY_FRONT.height;
-        this.BG_CITY_FRONT.parallaxSpeed = 0.75f;
+        this.BG_CITY_FRONT.parallaxSpeed = 0.75;
 
         this.BG_CITY_BACK = Assets.image(`${ASSETS_PATH.PARALLAX}/city_back.png`)
         this.BG_CITY_BACK.width = this.BG_CITY_BACK.width * scaleX;
         this.BG_CITY_BACK.height = this.BG_CITY_BACK.height * scaleY;
         this.BG_CITY_BACK.x = 0;
         this.BG_CITY_BACK.y = this.BG_CITY_FRONT.y + 14;
-        this.BG_CITY_BACK.parallaxSpeed = 0.35f
+        this.BG_CITY_BACK.parallaxSpeed = 0.35
 
         this.BG_LIGHT = Assets.image(`${ASSETS_PATH.PARALLAX}/light.png`)
         this.BG_LIGHT.width = this.BG_LIGHT.width * scaleX;
         this.BG_LIGHT.height = this.BG_LIGHT.height * scaleY;
         this.BG_LIGHT.x = 24;
-        this.BG_LIGHT.y = SCREEN_HEIGHT - (this.BG_LIGHT.height * 0.95f)
+        this.BG_LIGHT.y = SCREEN_HEIGHT - (this.BG_LIGHT.height * 0.95)
 
         this.BG_TOP_FIRST = Assets.image(`${ASSETS_PATH.PARALLAX}/top_first.png`)
         this.BG_TOP_FIRST.width = this.BG_TOP_FIRST.width * scaleX;
         this.BG_TOP_FIRST.height = this.BG_TOP_FIRST.height * scaleY;
         this.BG_TOP_FIRST.y = 0
         this.BG_TOP_FIRST.x = 0
-        this.BG_TOP_FIRST.parallaxSpeed = 0.5f;
+        this.BG_TOP_FIRST.parallaxSpeed = 0.5;
         this.BG_TOP_FIRST.gap = 222;
         this.BG_TOP_FIRST.coverScreen = false;
 
@@ -99,7 +105,7 @@ export default class GameScreen extends ScreenBase {
         this.BG_TOP_THIRD.height = this.BG_TOP_THIRD.height * scaleY;
         this.BG_TOP_THIRD.x = 0;
         this.BG_TOP_THIRD.y = 0;
-        this.BG_TOP_THIRD.parallaxSpeed = 0.25f;
+        this.BG_TOP_THIRD.parallaxSpeed = 0.25;
 
         this.BG_TOP_SECOND = Assets.image(`${ASSETS_PATH.PARALLAX}/top_second.png`)
         this.BG_TOP_SECOND.width = this.BG_TOP_SECOND.width * scaleX;
@@ -107,21 +113,73 @@ export default class GameScreen extends ScreenBase {
         this.BG_TOP_SECOND.x = this.BG_TOP_FIRST.width + (this.BG_TOP_FIRST.gap / 2) - (this.BG_TOP_SECOND.width / 2);
         this.BG_TOP_SECOND.y = 0;
         this.BG_TOP_SECOND.gap = this.BG_TOP_FIRST.width + this.BG_TOP_FIRST.gap;
-        this.BG_TOP_SECOND.parallaxSpeed = 0.5f;
+        this.BG_TOP_SECOND.parallaxSpeed = 0.5;
         this.BG_TOP_SECOND.coverScreen = false;
         this.BG_TOP_SECOND.numImages = 2;
+
+        this.BG_PAUSE = Assets.image(`${ASSETS_PATH.UI}/bg_pause.png`, {
+            optimize: true,
+            animConfig: {
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT
+            }
+        });
+        this.BTN_RESUME_PAUSE = Assets.image(`${ASSETS_PATH.UI}/btn_resume.png`, {
+            optimize: true,
+            animConfig: {
+                width: 288,
+                frameWidth: 288,
+                startx: 0,
+                endx: 288,
+                height: 85,
+                frameHeight: 85,
+                starty: 0,
+                endy: 85,
+                framesPerRow: 2,
+                totalFrames: 2,
+                fps: 0,
+                x: (SCREEN_WIDTH - 288) / 2,
+                y: (SCREEN_HEIGHT - 180) / 2,
+                animations: {
+                    normal: { start: 0, end: 0 },
+                    hover: { start: 1, end: 1 }
+                }
+            }
+        })
+        this.BTN_RETURN_MENU = Assets.image(`${ASSETS_PATH.UI}/btn_return.png`, {
+            optimize: true,
+            animConfig: {
+                width: 288,
+                frameWidth: 288,
+                startx: 0,
+                endx: 288,
+                height: 82,
+                frameHeight: 82,
+                fps: 0,
+                starty: 0,
+                endy: 82,
+                totalFrames: 2,
+                framesPerRow: 2,
+                x: (SCREEN_WIDTH - 288) / 2,
+                y: this.BTN_RESUME_PAUSE.y + 85,
+                animations: {
+                    normal: { start: 0, end: 0 },
+                    hover: { start: 1, end: 1 }
+                }
+            }
+        })
     }
 
-    drawParallaxTop() {
-        parallaxHorizontally(this.BG_TOP_THIRD, 1)
-        parallaxHorizontally(this.BG_TOP_SECOND, 1)
-        parallaxHorizontally(this.BG_TOP_FIRST, 1)
+    drawParallaxTop(deltaTime) {
+        parallaxHorizontally(this.BG_TOP_THIRD, deltaTime)
+        parallaxHorizontally(this.BG_TOP_SECOND, deltaTime)
+        parallaxHorizontally(this.BG_TOP_FIRST, deltaTime)
     }
 
-    drawParallaxBottom() {
-        parallaxHorizontally(this.BG_CITY_BACK, 1)
+    drawParallaxBottom(deltaTime) {
+        parallaxHorizontally(this.BG_CITY_BACK, deltaTime)
         this.BG_LIGHT.draw(this.BG_LIGHT.x, this.BG_LIGHT.y)
-        parallaxHorizontally(this.BG_CITY_FRONT, 1)
+        parallaxHorizontally(this.BG_CITY_FRONT, deltaTime)
     }
 
     handleInput() {
@@ -130,8 +188,50 @@ export default class GameScreen extends ScreenBase {
         }
 
         if (Gamepad.player(PLAYER_ONE_PORT).justPressed(Pads.START)) {
-            console.log("PAUSE")
+            this.isPaused = !this.isPaused;
+            this.STREAM_GAME.playing() ? this.STREAM_GAME.pause() : this.STREAM_GAME.play();
+
+            if (this.isPaused) {
+                this.selectedIndex = 0;
+            }
         }
+
+        if (this.isPaused) {
+            if (Gamepad.player(PLAYER_ONE_PORT).justPressed(Pads.UP) && this.selectedIndex === 1) {
+                setAnimation(this.BTN_RESUME_PAUSE, "hover");
+                setAnimation(this.BTN_RETURN_MENU, "normal");
+                this.selectedIndex = 0;
+            }
+
+            if (Gamepad.player(PLAYER_ONE_PORT).justPressed(Pads.DOWN) && this.selectedIndex === 0) {
+                setAnimation(this.BTN_RETURN_MENU, "hover");
+                setAnimation(this.BTN_RESUME_PAUSE, "normal");
+                this.selectedIndex = 1;
+            }
+
+            if (Gamepad.player(PLAYER_ONE_PORT).justPressed(Pads.CROSS)) {
+                if (this.selectedIndex === 0) {
+                    this.SFX_CLICK.play();
+                    this.isPaused = false;
+                    !this.STREAM_GAME.playing() && this.STREAM_GAME.play();
+                }
+
+                if (this.selectedIndex === 1) {
+                    this.SFX_CLICK.play();
+                    StateManager.setState(GAME_STATE.LOADING, { targetState: GAME_STATE.MAIN_MENU })
+                }
+            }
+        }
+    }
+
+    drawPauseUI() {
+        this.BG_PAUSE.draw(0, 0);
+
+        animationSprite(this.BTN_RESUME_PAUSE);
+        this.BTN_RESUME_PAUSE.draw(this.BTN_RESUME_PAUSE.x, this.BTN_RESUME_PAUSE.y);
+
+        animationSprite(this.BTN_RETURN_MENU);
+        this.BTN_RETURN_MENU.draw(this.BTN_RETURN_MENU.x, this.BTN_RETURN_MENU.y);
     }
 
     update(deltaTime) {
@@ -139,23 +239,27 @@ export default class GameScreen extends ScreenBase {
 
         this.handleInput();
 
-        if (this.player) {
-            this.player.update(deltaTime);
+        if (!this.isPaused) {
+            if (this.player) {
+                this.player.update(deltaTime);
+            }
+            Collision.check();
         }
-
-        Collision.check();
     }
 
     render() {
         if (!this.isActive) return;
 
         this.BACKGROUND.draw(0, 0);
-        this.drawParallaxBottom();
-        this.drawParallaxTop();
 
-        if (this.player) {
-            this.player.draw();
-        }
+        const parallaxDeltaTime = this.isPaused ? 0 : 1;
+
+        this.drawParallaxBottom(parallaxDeltaTime);
+        this.drawParallaxTop(parallaxDeltaTime);
+
+        if (this.player) this.player.draw();
+
+        if (this.isPaused) this.drawPauseUI();
 
         Collision.renderDebug();
     }
@@ -169,11 +273,15 @@ export default class GameScreen extends ScreenBase {
         Assets.free(`${ASSETS_PATH.PARALLAX}/top_first.png`)
         Assets.free(`${ASSETS_PATH.PARALLAX}/top_third.png`)
         Assets.free(`${ASSETS_PATH.PARALLAX}/top_second.png`)
+        Assets.free(`${ASSETS_PATH.UI}/bg_pause.png`)
+        Assets.free(`${ASSETS_PATH.UI}/btn_resume.png`)
+        Assets.free(`${ASSETS_PATH.UI}/btn_return.png`)
     }
 
     onExit() {
         super.onExit();
         if (this.STREAM_GAME.playing()) {
+            this.STREAM_GAME.pause();
             this.STREAM_GAME.rewind();
             this.STREAM_GAME.free();
         }
