@@ -16,10 +16,13 @@ export default class MainMenuScreen extends ScreenBase {
         this.isTransitioning = false;
         this.targetMode = null;
 
+        this.isFirstEntry = true;
+
         this.introAnimationDone = false;
         this.flashRequested = false;
         this.flashing = false;
         this.flashStartTime = 0;
+        this.skipNextFlash = false;
 
         this.shaking = false;
         this.shakeStartTime = 0;
@@ -281,8 +284,12 @@ export default class MainMenuScreen extends ScreenBase {
                 if (blueDone && whiteDone) {
                     this.introAnimationDone = true;
                     this._introAnimStarted = false;
-                    this.flashRequested = true;
+                    if (!this.skipNextFlash) {
+                        this.flashRequested = true;
+                    }
+                    this.skipNextFlash = false;
                 }
+
             }
             this.BG_BLUE_GUY.draw(this.BG_BLUE_GUY.x + this.shakeOffsetX, SCREEN_HEIGHT - this.BG_BLUE_GUY.height + this.shakeOffsetY);
             this.BG_WHITE_GUY.draw(this.BG_WHITE_GUY.x + this.shakeOffsetX, SCREEN_HEIGHT - this.BG_WHITE_GUY.height + this.shakeOffsetY);
@@ -395,18 +402,19 @@ export default class MainMenuScreen extends ScreenBase {
         if (!this.isTransitioning) return;
 
         if (!this._transitionStarted) {
-            delete this.BG_BLUE_GUY._deltas;
-            delete this.BG_BLUE_GUY._base;
-            delete this.BG_BLUE_GUY.start;
-            delete this.BG_WHITE_GUY._deltas;
-            delete this.BG_WHITE_GUY._base;
-            delete this.BG_WHITE_GUY.start;
+            const propsToClean = ['_deltas', '_base', 'start', 'duration', 'extraDelay', 'loopEnabled', 'shouldReverse', 'isReversed'];
+
+            propsToClean.forEach(prop => {
+                delete this.BG_BLUE_GUY[prop];
+                delete this.BG_WHITE_GUY[prop];
+            });
+
             this._transitionStarted = true;
             this.selectedIndex = 0;
         }
 
-        const blueDone = animateWithEasing(this.BG_BLUE_GUY, { x: -this.BG_BLUE_GUY.width }, Easing.linear, 400);
-        const whiteDone = animateWithEasing(this.BG_WHITE_GUY, { x: SCREEN_WIDTH }, Easing.linear, 400);
+        const blueDone = animateWithEasing(this.BG_BLUE_GUY, { x: -this.BG_BLUE_GUY.width }, Easing.linear, 300);
+        const whiteDone = animateWithEasing(this.BG_WHITE_GUY, { x: SCREEN_WIDTH }, Easing.linear, 300);
 
         if (blueDone && whiteDone) {
             this.isTransitioning = false;
@@ -417,6 +425,7 @@ export default class MainMenuScreen extends ScreenBase {
             } else if (this.targetMode === 'main_menu') {
                 this.isMultiplayerMode = false;
                 this.introAnimationDone = false;
+                this.skipNextFlash = true;
             }
             this.targetMode = null;
         }
@@ -461,8 +470,13 @@ export default class MainMenuScreen extends ScreenBase {
         if (this.flashRequested) {
             this.flashing = true;
             this.flashStartTime = Date.now();
-            this.shaking = true;
-            this.shakeStartTime = Date.now();
+
+            if (this.isFirstEntry) {
+                this.shaking = true;
+                this.shakeStartTime = Date.now();
+                this.isFirstEntry = false;
+            }
+
             this.flashRequested = false;
         }
 
@@ -493,7 +507,7 @@ export default class MainMenuScreen extends ScreenBase {
             }
 
             if (this.flashing) {
-                alpha *= 0.4;
+                alpha *= 0.4f;
                 const flashColor = Color.new(255, 255, 255, alpha);
                 Draw.rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, flashColor);
             }
