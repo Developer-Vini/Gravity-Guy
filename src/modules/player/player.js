@@ -199,8 +199,6 @@ export default class Player {
         this.updateAnimation(deltaTime);
         this.updateCollider(bounds);
         this.handleAnimation();
-
-        this.draw();
     }
 
     destroy() {

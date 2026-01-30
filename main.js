@@ -1,38 +1,54 @@
-import GAME_LOOP from './src/modules/screens/game/game.js';
-import MAIN_MENU_LOOP from './src/modules/screens/main_menu/menu.js';
+import GameScreen from './src/modules/screens/game/game.js';
+import LoadingScreen from './src/modules/screens/loading/loading.js';
+import MainMenuScreen from './src/modules/screens/main_menu/menu.js';
+import { GAME_STATE } from './src/shared/constants.js';
 import Gamepad from './src/shared/gamepad.js'
-
-// const ARMOR_INTRO = new Video("./assets/video/armor.m2v");
+import StateManager from './src/shared/stateManager.js';
 
 Screen.setParam(Screen.DEPTH_TEST_ENABLE, false);
 
-let lastFrameTime = Date.now();
-while (true) {
-    Screen.clear();
+function initializeGame() {
+    const mainMenuScreen = new MainMenuScreen();
+    const gameScreen = new GameScreen();
+    const loadingScreen = new LoadingScreen();
 
-    const now = Date.now();
-    const deltaTime = (now - lastFrameTime) / 1000;
-    lastFrameTime = now;
+    StateManager.registerScreen(GAME_STATE.MAIN_MENU, mainMenuScreen);
+    StateManager.registerScreen(GAME_STATE.SINGLE_PLAYER, gameScreen);
+    StateManager.registerScreen(GAME_STATE.LOADING, loadingScreen);
 
-    Gamepad.update();
+    StateManager.screens.forEach(screen => {
+        screen.init();
+    });
 
-    // if (ARMOR_INTRO.ready) {
-    //     if (!ARMOR_INTRO.playing) {
-    //         ARMOR_INTRO.play();
-    //     }
-    //     ARMOR_INTRO.update();
-
-    //     ARMOR_INTRO.draw(0, 0, 640, 512);
-    // }
-
-    // if (ARMOR_INTRO.ended) {
-    //     ARMOR_INTRO.free();
-
-    //     MAIN_MENU_LOOP();
-    // }
-
-    // MAIN_MENU_LOOP(deltaTime);
-    GAME_LOOP(deltaTime);
-
-    Screen.flip();
+    StateManager.setState(GAME_STATE.MAIN_MENU);
 }
+
+function gameLoop() {
+    let lastFrameTime = Date.now();
+
+    while (true) {
+        Screen.clear();
+        const now = Date.now();
+        const deltaTime = (now - lastFrameTime) / 1000;
+        lastFrameTime = now;
+
+        Gamepad.update();
+
+        StateManager.update(deltaTime);
+        StateManager.render();
+
+        Screen.flip();
+    }
+}
+
+function main() {
+    try {
+        initializeGame();
+        gameLoop();
+    } catch (error) {
+        console.log("[Game] Fatal error:", error);
+        throw error;
+    }
+}
+
+main();

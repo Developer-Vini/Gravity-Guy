@@ -25,10 +25,8 @@ export default class Movement2D {
     isInMaxYVelocity = () => Math.abs(this.velocity.y) <= PLAYER_MOVEMENT.MAX_Y_VELOCITY;
     setCanMove = (canMove) => this.canMove = canMove;
     applyGravity = () => this.velocity.y += PLAYER_MOVEMENT.DEFAULT_GRAVITY * (this.facingUp ? -1 : 1)
-
-    moveForward() {
-        this.velocity.x = PLAYER_MOVEMENT.DEFAULT_SPEED;
-    }
+    moveForward = () => this.velocity.x = PLAYER_MOVEMENT.DEFAULT_SPEED;
+    die = () => this.canMove ? this.canMove = false : null;
 
     checkGroundCollision(colliderId, bounds) {
         const checkY = this.facingUp ? bounds.top - 4 : bounds.bottom;
@@ -113,12 +111,6 @@ export default class Movement2D {
         }
 
         return this.touchingWall;
-    }
-
-    die() {
-        if (!this.canMove) return;
-
-        this.canMove = false;
     }
 
     flip() {

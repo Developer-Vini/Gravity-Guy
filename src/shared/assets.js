@@ -3,12 +3,18 @@ const soundCache = new Map();
 const fontCache = new Map();
 
 export default class Assets {
-    static image(path, animConfig = {}) {
+    static image(path, options = {}) {
         if (imageCache.has(path)) return imageCache.get(path).asset;
         const img = new Image(path);
 
-        if (animConfig && Object.keys(animConfig).length > 0) {
-            Object.assign(img, animConfig);
+        if (Object.keys(options).length > 0) {
+            if (options.optimize) {
+                img.optimize();
+            }
+
+            if (options.animConfig && Object.keys(options.animConfig).length > 0) {
+                Object.assign(img, options.animConfig);
+            }
         }
 
         img.lock();
@@ -51,6 +57,9 @@ export default class Assets {
         [imageCache, soundCache, fontCache].forEach(cache => {
             const entry = cache.get(path);
             if (entry && --entry.ref <= 0) {
+
+                if (entry.asset.locked()) entry.asset.unlock();
+
                 entry.asset.free();
                 cache.delete(path);
             }
