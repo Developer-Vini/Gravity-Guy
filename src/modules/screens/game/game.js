@@ -16,7 +16,7 @@ export default class GameScreen extends ScreenBase {
         super.init();
     }
 
-    onEnter() {
+    onEnter(fromState) {
         super.onEnter(fromState);
         this._initColliders();
         this._initAssets();

@@ -104,7 +104,7 @@ class StateManager {
             newScreen.onEnter(this.previousState);
         }
 
-        if (this.previousState === GAME_STATE.LOADING && this.loadingTarget) {
+        if (this.currentState === GAME_STATE.LOADING && this.loadingTarget) {
             const targetState = this.loadingTarget;
             const loadingData = this.loadingData;
             this.loadingTarget = null;
