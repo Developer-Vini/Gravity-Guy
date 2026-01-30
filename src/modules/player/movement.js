@@ -5,14 +5,15 @@ import Assets from "../../shared/assets.js";
 
 export default class Movement2D {
     constructor(options) {
-        this.position = { x: options.initialX || 0, y: options.initialY || 0 }
+        this.position = { x: options.initialX, y: options.initialY }
         this.velocity = { x: 0, y: 0 }
-        this.facingUp = true;
+        this.facingUp = false;
         this.canMove = true;
         this.onGround = false;
         this.touchingWall = false;
         this.wallDirection = 0;
         this.onFlip = options.onFlip;
+        this.isPlayerInitializing = options.isPlayerInitializing;
 
         this.PLAYER_PORT = options.playerPort;
 
@@ -128,6 +129,9 @@ export default class Movement2D {
 
     update(deltaTime) {
         if (this.canMove && this.isGrounded() && Gamepad.player(this.PLAYER_PORT).justPressed(Pads.CROSS)) {
+            if (this.isPlayerInitializing && this.isPlayerInitializing()) {
+                return;
+            }
             this.onFlip?.();
             this.flip();
         }

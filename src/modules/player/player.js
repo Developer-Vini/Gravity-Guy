@@ -7,11 +7,13 @@ import Assets from "../../shared/assets.js";
 export default class Player {
     constructor(options = {}) {
         this.PLAYER_PORT = options.PLAYER_PORT || 0;
+        this.isInitializing = true;
         this.movement = new Movement2D({
-            initialX: options.initialX || SCREEN_WIDTH / 2,
-            initialY: options.initialY || 100,
+            initialX: options.initialX,
+            initialY: options.initialY,
             playerPort: this.PLAYER_PORT,
-            onFlip: this.playDustEffect.bind(this)
+            onFlip: this.playDustEffect.bind(this),
+            isPlayerInitializing: () => this.isInitializing
         });
         this._bounds = { left: 0, top: 0, right: 0, bottom: 0 };
 
@@ -84,7 +86,11 @@ export default class Player {
             }
         }
 
-        setAnimation(this.spritesheet, PLAYER_ANIMATION.INIT);
+        setAnimation(this.spritesheet, PLAYER_ANIMATION.INIT, false);
+        this.spritesheet.onAnimationEnd = () => {
+            this.isInitializing = false;
+            setAnimation(this.spritesheet, PLAYER_ANIMATION.WALK);
+        };
     }
 
     _initCollider() {
@@ -135,6 +141,9 @@ export default class Player {
     }
 
     handleAnimation() {
+        if (this.isInitializing) {
+            return;
+        }
         if (!this.movement.canMove) setAnimation(this.spritesheet, PLAYER_ANIMATION.DEAD);
         else if (this.movement.isWallSliding()) setAnimation(this.spritesheet, PLAYER_ANIMATION.WALK_SLIDE);
         else if (this.movement.isFalling()) setAnimation(this.spritesheet, PLAYER_ANIMATION.FALL);

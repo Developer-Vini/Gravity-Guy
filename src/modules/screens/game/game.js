@@ -10,6 +10,7 @@ export default class GameScreen extends ScreenBase {
     constructor() {
         super()
         this.player = null;
+        this.isPaused = false;
     }
 
     init() {
@@ -20,7 +21,7 @@ export default class GameScreen extends ScreenBase {
         super.onEnter(fromState);
         this._initColliders();
         this._initAssets();
-        this.player = new Player({ PLAYER_PORT: PLAYER_ONE_PORT })
+        this.player = new Player({ PLAYER_PORT: PLAYER_ONE_PORT, initialX: 50, initialY: SCREEN_HEIGHT - 120 })
 
         if (!this.STREAM_GAME.playing()) {
             this.STREAM_GAME.play();
